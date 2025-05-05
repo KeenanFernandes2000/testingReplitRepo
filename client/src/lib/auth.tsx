@@ -3,12 +3,27 @@ import { queryClient } from "./queryClient";
 import { apiRequest } from "./queryClient";
 import { User } from "@shared/schema";
 
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+interface RegisterCredentials {
+  username: string;
+  email: string;
+  password: string;
+  displayName: string;
+}
+
 interface AuthContextProps {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<User>;
+  register: (credentials: RegisterCredentials) => Promise<User>;
   signOut: () => Promise<void>;
+  authError: string | null;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -17,6 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch the current user when the app loads
@@ -58,6 +74,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const login = async (credentials: LoginCredentials): Promise<User> => {
+    try {
+      setIsLoading(true);
+      setAuthError(null);
+      
+      const response = await apiRequest("POST", "/api/auth/login", credentials);
+      const userData = await response.json();
+      
+      setUser(userData);
+      setIsAuthenticated(true);
+      return userData;
+    } catch (error) {
+      console.error("Login error:", error);
+      const message = error instanceof Error ? error.message : "Failed to login";
+      setAuthError(message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const register = async (credentials: RegisterCredentials): Promise<User> => {
+    try {
+      setIsLoading(true);
+      setAuthError(null);
+      
+      const response = await apiRequest("POST", "/api/auth/register", credentials);
+      const userData = await response.json();
+      
+      setUser(userData);
+      setIsAuthenticated(true);
+      return userData;
+    } catch (error) {
+      console.error("Registration error:", error);
+      const message = error instanceof Error ? error.message : "Failed to register";
+      setAuthError(message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       setIsLoading(true);
@@ -80,7 +138,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated,
     isLoading,
     signInWithGoogle,
-    signOut
+    login,
+    register,
+    signOut,
+    authError
   };
   
   return (
