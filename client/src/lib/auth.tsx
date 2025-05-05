@@ -79,8 +79,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       setAuthError(null);
       
-      const response = await apiRequest("POST", "/api/auth/login", credentials);
+      console.log("Attempting login with:", credentials.email);
+      
+      // Use direct fetch for better error handling
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+      
       const userData = await response.json();
+      console.log("Login successful:", userData);
       
       setUser(userData);
       setIsAuthenticated(true);

@@ -84,12 +84,35 @@ export default function Auth() {
     try {
       // Remove confirmPassword as it's not needed in the API call
       const { confirmPassword, ...registerData } = data;
-      await register(registerData);
+      
+      console.log("Registering with data:", registerData);
+      
+      // Make direct API request instead of using auth hook for better error handling
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registerData),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+      
+      const userData = await response.json();
+      
       toast({
         title: "Registration successful",
         description: "Welcome to Vlog72!",
       });
+      
+      // Redirect to home page after successful registration
+      navigate("/");
     } catch (error) {
+      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
         description: error instanceof Error ? error.message : "Please check your information and try again",

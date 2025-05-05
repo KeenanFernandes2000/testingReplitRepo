@@ -135,6 +135,8 @@ export function setupAuthRoutes(app: Express) {
     try {
       const { email, username, password, displayName } = req.body;
       
+      console.log("Registration attempt:", { email, username, displayName });
+      
       // Check if email already exists
       const existingEmail = await storage.getUserByEmail(email);
       if (existingEmail) {
@@ -145,6 +147,10 @@ export function setupAuthRoutes(app: Express) {
       const existingUsername = await storage.getUserByUsername(username);
       if (existingUsername) {
         return res.status(400).json({ message: "Username already taken" });
+      }
+      
+      if (!password) {
+        return res.status(400).json({ message: "Password is required" });
       }
       
       // Hash the password
@@ -160,9 +166,12 @@ export function setupAuthRoutes(app: Express) {
         followingCount: 0
       });
       
+      console.log("User created:", user.id);
+      
       // Log the user in
       req.login(user, (err) => {
         if (err) {
+          console.error("Login error after registration:", err);
           return res.status(500).json({ message: "Error logging in after registration" });
         }
         return res.status(201).json(user);
@@ -170,7 +179,7 @@ export function setupAuthRoutes(app: Express) {
       
     } catch (error) {
       console.error("Registration error:", error);
-      res.status(500).json({ message: "Server error during registration" });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Server error during registration" });
     }
   });
   
