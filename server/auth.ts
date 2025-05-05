@@ -1,7 +1,20 @@
 import type { Express } from "express";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as LocalStrategy } from "passport-local";
+import bcrypt from "bcrypt";
 import { storage } from "./storage";
+import { eq } from "drizzle-orm";
+
+// Helper functions for local authentication
+async function hashPassword(password: string): Promise<string> {
+  const salt = await bcrypt.genSalt(10);
+  return bcrypt.hash(password, salt);
+}
+
+async function comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
+  return await bcrypt.compare(plainPassword, hashedPassword);
+}
 
 // Passport user serialization
 passport.serializeUser((user: any, done) => {
@@ -18,6 +31,35 @@ passport.deserializeUser(async (id: number, done) => {
 });
 
 export function setupAuthRoutes(app: Express) {
+  // Configure Local Strategy for username/password login
+  passport.use(new LocalStrategy(
+    { 
+      usernameField: 'email',
+    },
+    async (email, password, done) => {
+      try {
+        // Find user with the given email
+        const user = await storage.getUserByEmail(email);
+        
+        // If user doesn't exist or password is not set
+        if (!user || !user.password) {
+          return done(null, false, { message: 'Invalid email or password' });
+        }
+        
+        // Check if the password matches
+        const isPasswordValid = await comparePasswords(password, user.password);
+        if (!isPasswordValid) {
+          return done(null, false, { message: 'Invalid email or password' });
+        }
+        
+        // All good, return user
+        return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    }
+  ));
+  
   // Configure Google Strategy with a relative callback URL
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID || "",
@@ -86,6 +128,77 @@ export function setupAuthRoutes(app: Express) {
       res.redirect("/");
     }
   );
+  
+  // Local authentication routes
+  // Register a new user
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { email, username, password, displayName } = req.body;
+      
+      // Check if email already exists
+      const existingEmail = await storage.getUserByEmail(email);
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+      
+      // Check if username already exists
+      const existingUsername = await storage.getUserByUsername(username);
+      if (existingUsername) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+      
+      // Hash the password
+      const hashedPassword = await hashPassword(password);
+      
+      // Create the user
+      const user = await storage.createUser({
+        email,
+        username,
+        displayName,
+        password: hashedPassword,
+        followersCount: 0,
+        followingCount: 0
+      });
+      
+      // Log the user in
+      req.login(user, (err) => {
+        if (err) {
+          return res.status(500).json({ message: "Error logging in after registration" });
+        }
+        return res.status(201).json(user);
+      });
+      
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Server error during registration" });
+    }
+  });
+  
+  // Login with email and password
+  app.post("/api/auth/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) {
+        return next(err);
+      }
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Authentication failed" });
+      }
+      req.login(user, (err) => {
+        if (err) {
+          return next(err);
+        }
+        return res.json(user);
+      });
+    })(req, res, next);
+  });
+  
+  // Get current authenticated user
+  app.get("/api/auth/me", (req, res) => {
+    if (req.isAuthenticated()) {
+      return res.json(req.user);
+    }
+    return res.status(401).json({ message: "Not authenticated" });
+  });
   
   // Logout route
   app.post("/api/auth/logout", (req, res) => {

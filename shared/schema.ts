@@ -9,9 +9,10 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   displayName: text("display_name").notNull(),
   email: text("email").notNull().unique(),
+  password: text("password"), // For local authentication
   avatarUrl: text("avatar_url"),
   bio: text("bio"),
-  googleId: text("google_id").notNull().unique(),
+  googleId: text("google_id").unique(), // Made optional for local auth
   googleAccessToken: text("google_access_token"),
   googleRefreshToken: text("google_refresh_token"),
   googleTokenExpiry: timestamp("google_token_expiry"),
