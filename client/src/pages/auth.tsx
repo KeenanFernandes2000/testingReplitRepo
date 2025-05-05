@@ -315,6 +315,17 @@ export default function Auth() {
             <p className="mt-6 text-xs text-gray-400 text-center">
               By continuing, you agree to our Terms of Service and Privacy Policy.
             </p>
+            
+            {/* Bypass Authentication Button */}
+            <div className="mt-6 pt-6 border-t border-gray-700">
+              <Button 
+                variant="link" 
+                className="w-full text-gray-400 hover:text-white"
+                onClick={() => navigate("/")}
+              >
+                Skip Authentication (Development Only)
+              </Button>
+            </div>
           </div>
         </div>
       </div>
