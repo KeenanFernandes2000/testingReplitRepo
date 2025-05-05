@@ -18,11 +18,16 @@ passport.deserializeUser(async (id: number, done) => {
 });
 
 export function setupAuthRoutes(app: Express) {
+  // Get the app URL from environment or use the Replit domain
+  const appHost = process.env.REPLIT_SLUG 
+    ? `https://${process.env.REPLIT_SLUG}.${process.env.REPLIT_DOMAIN}`
+    : process.env.APP_URL || "http://localhost:5000";
+    
   // Configure Google Strategy
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID || "",
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    callbackURL: "/api/auth/google/callback",
+    callbackURL: `${appHost}/api/auth/google/callback`,
     scope: ["profile", "email", "https://www.googleapis.com/auth/youtube.upload"]
   }, async (accessToken, refreshToken, profile, done) => {
     try {

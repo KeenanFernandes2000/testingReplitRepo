@@ -19,10 +19,15 @@ async function getOAuth2Client(userId: number) {
     throw new Error("User not found or missing Google credentials");
   }
   
+  // Get the app URL from environment or use the Replit domain
+  const appHost = process.env.REPLIT_SLUG 
+    ? `https://${process.env.REPLIT_SLUG}.${process.env.REPLIT_DOMAIN}`
+    : process.env.APP_URL || "http://localhost:5000";
+    
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    `${process.env.APP_URL || "http://localhost:5000"}/api/auth/google/callback`
+    `${appHost}/api/auth/google/callback`
   );
   
   // Set credentials
