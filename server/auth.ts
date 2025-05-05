@@ -176,16 +176,16 @@ export function setupAuthRoutes(app: Express) {
   
   // Login with email and password
   app.post("/api/auth/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: Error | null, user: any, info: { message: string } | undefined) => {
       if (err) {
         return next(err);
       }
       if (!user) {
         return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
-      req.login(user, (err) => {
-        if (err) {
-          return next(err);
+      req.login(user, (loginErr: Error | null) => {
+        if (loginErr) {
+          return next(loginErr);
         }
         return res.json(user);
       });
@@ -202,7 +202,7 @@ export function setupAuthRoutes(app: Express) {
   
   // Logout route
   app.post("/api/auth/logout", (req, res) => {
-    req.logout((err) => {
+    req.logout((err: Error | null) => {
       if (err) {
         return res.status(500).json({ message: "Error logging out" });
       }

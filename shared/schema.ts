@@ -77,8 +77,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   vlogs: many(vlogs),
   comments: many(comments),
   givenLikes: many(vlogLikes),
-  following: many(follows, { relationName: "following", foreignKey: [follows.followerId] }),
-  followers: many(follows, { relationName: "followers", foreignKey: [follows.followingId] }),
+  following: many(follows, { relationName: "following" }),
+  followers: many(follows, { relationName: "followers" }),
 }));
 
 export const vlogsRelations = relations(vlogs, ({ one, many }) => ({
