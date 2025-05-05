@@ -1,0 +1,67 @@
+🟡 App Name (Placeholder: Vlog72)
+A follower-based vlog-sharing web app where users upload pre-recorded videos to their own YouTube accounts (as "unlisted") via OAuth. These videos are then embedded in a private, follower-only feed and automatically expire after 72 hours, promoting timely, authentic storytelling. The app avoids hosting video files directly and focuses on providing a simple, elegant social layer. Everything is built with TypeScript for full type safety across the stack.
+
+✅ Core Features
+Google OAuth login using YouTube scopes for direct upload to user accounts.
+
+Uploads handled via YouTube Data API v3, with metadata stored in your own database.
+
+Follower-only feed displaying embedded YouTube videos.
+
+Video expiration system hides vlogs after 72 hours automatically.
+
+No in-app camera/recording — users upload edited/pre-recorded vlogs only.
+
+YouTube embed player for consistent playback across devices.
+
+Mobile-friendly UI, fast feed navigation, simple interactions (like reactions or lightweight comments).
+
+🧰 Tech Stack (with TypeScript & VPS Hosting)
+Frontend
+Framework: Next.js (in custom server mode)
+
+Language: TypeScript
+
+Styling: Tailwind CSS
+
+Auth: NextAuth.js with Google OAuth
+
+Video Embeds: YouTube iframe API
+
+Backend / Server
+Node.js + TypeScript
+
+Framework: API routes in Next.js or Express (if decoupled backend needed later)
+
+YouTube API: googleapis Node.js SDK with full TypeScript types
+
+Scheduling Jobs: node-cron, bree, or system-level crontab
+
+Type Safety: End-to-end validation with zod or valibot
+
+Database
+PostgreSQL (self-hosted or managed like Supabase/Neon)
+
+ORM: Prisma (Type-safe, auto-generates types from your schema)
+
+Hosting & Ops
+Hosting: Self-hosted on your VPS
+
+Process Manager: PM2 or Docker
+
+Reverse Proxy: Nginx or Caddy
+
+SSL: Let’s Encrypt (via Certbot or Caddy)
+
+Environment Management: .env files, dotenv-safe, or secrets manager
+
+🔒 Type Safety Highlights
+✅ TypeScript across all layers (frontend, backend, database access)
+
+✅ Prisma auto-generates types from the DB schema
+
+✅ Zod/Valibot used for request validation (input/output of API routes)
+
+✅ Shared types via a central types/ directory (e.g., VideoMeta, User, FollowerEdge)
+
+✅ No any types or unsafe casting in final code
