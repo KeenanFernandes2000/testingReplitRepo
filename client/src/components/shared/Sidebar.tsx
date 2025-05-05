@@ -12,11 +12,9 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-64 bg-gray-800 p-4 h-screen sticky top-0">
       <div className="flex items-center mb-8">
-        <Link href="/">
-          <a className="text-2xl font-bold text-white flex items-center">
-            <span className="text-primary">Vlog</span>
-            <span className="text-secondary">72</span>
-          </a>
+        <Link href="/" className="text-2xl font-bold text-white flex items-center">
+          <span className="text-primary">Vlog</span>
+          <span className="text-secondary">72</span>
         </Link>
       </div>
       

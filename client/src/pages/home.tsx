@@ -41,10 +41,8 @@ export default function Home() {
           </p>
         </div>
         
-        <Link href="/auth">
-          <a className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white py-3 px-8 rounded-lg font-medium">
-            Log in with Google
-          </a>
+        <Link href="/auth" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white py-3 px-8 rounded-lg font-medium inline-block">
+          Log in with Google
         </Link>
       </div>
     );
@@ -93,10 +91,8 @@ export default function Home() {
                   View all vlogs
                 </button>
               ) : (
-                <Link href="/discover">
-                  <a className="text-primary hover:text-indigo-400">
-                    Discover new creators
-                  </a>
+                <Link href="/discover" className="text-primary hover:text-indigo-400 inline-block">
+                  Discover new creators
                 </Link>
               )}
             </div>
