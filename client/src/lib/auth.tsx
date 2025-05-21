@@ -117,8 +117,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       setAuthError(null);
       
-      const response = await apiRequest("POST", "/api/auth/register", credentials);
+      console.log("Attempting registration with:", credentials.email, credentials.username);
+      
+      // Use direct fetch for better error handling
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+      
       const userData = await response.json();
+      console.log("Registration successful:", userData);
       
       setUser(userData);
       setIsAuthenticated(true);
